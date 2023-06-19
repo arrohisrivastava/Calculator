@@ -81,8 +81,10 @@ class MainActivity : AppCompatActivity() {
         // Add 0 after decimal point if no number follows it
         modifiedExpression = modifiedExpression.replace(Regex("(?<=\\d)\\.(?=\\D|$)"), ".0")
 
-        //Add a * after % if no operator follows it
-        modifiedExpression = modifiedExpression.replace(Regex("(?<![*/+-])%(?![*/+-])"), "%*")
+        modifiedExpression = modifiedExpression.replace(Regex("(?<![*/+-])%(?=\\d)(?![*/+-])"), "%*")
+
+//        //Add a * after % if no operator follows it
+//        modifiedExpression = modifiedExpression.replace(Regex("(?<![*/+-])%(?![*/+-])"), "%*")
 
         // Replace % with /100 if it is after a number
         modifiedExpression = modifiedExpression.replace(Regex("(?<=\\d)%"), "/100")
