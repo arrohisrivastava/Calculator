@@ -1,9 +1,13 @@
 package com.example.calulator
 
+import android.animation.ObjectAnimator
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Property
+import android.util.TypedValue
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +16,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import com.example.calulator.databinding.ActivityMainBinding
 import org.mariuszgromada.math.mxparser.Expression
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -28,8 +33,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun clearExpression() {
+        finResultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        resultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 38f)
+
         resultTextView.text = ""
         finResultTextView.text = ""
+    }
+
+    fun appendToExpression(txt: String) {
+        resultTextView.append(txt)
+    }
+
+    fun deleteLastCharacter() {
+        val currentText = resultTextView.text.toString()
+
+        if (currentText.isNotEmpty()) {
+            val newText = currentText.substring(0, currentText.length - 1)
+            resultTextView.text = newText
+            if(newText.isEmpty())
+                clearExpression()
+        }
     }
 
     fun mekRed() {
@@ -46,21 +69,6 @@ class MainActivity : AppCompatActivity() {
             resultTextView.setTextColor(Color.WHITE)
             finResultTextView.setTextColor(Color.WHITE)
         }
-
-
-    }
-
-    fun appendToExpression(txt: String) {
-        resultTextView.append(txt)
-    }
-
-    fun deleteLastCharacter() {
-        val currentText = resultTextView.text.toString()
-
-        if (currentText.isNotEmpty()) {
-            val newText = currentText.substring(0, currentText.length - 1)
-            resultTextView.text = newText
-        }
     }
 
     fun operason() {
@@ -69,6 +77,12 @@ class MainActivity : AppCompatActivity() {
         val result = eval(expres)
         if (result.isValidExpression) {
             finResultTextView.append(result.value.toString())
+            val smol = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+                24f, resources.displayMetrics)
+            val bigg = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+                38f, resources.displayMetrics)
+            finResultTextView.animateTextSize(smol, bigg, 300)
+            resultTextView.animateTextSize(bigg, smol, 300)
         } else {
             mekRed()
             finResultTextView.text = "Invalid Expression"
@@ -94,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         val value = convertToNumber(Expression(expression).calculate().toString())
         return CalculationResult(value, isValidExpression(expression))
     }
-
 
     private fun isValidExpression(expression: String): Boolean {
         val regexPattern = "^([-+.]?\\d+\\.?\\d*[-+*/.%])*[.]?\\d+\\.?\\d*[%]?$".toRegex()
@@ -140,8 +153,24 @@ class MainActivity : AppCompatActivity() {
 
     data class CalculationResult(val value: Any?, val isValidExpression: Boolean)
 
+    fun TextView.animateTextSize(fromSize: Float, toSize: Float, duration: Long) {
+        val property = object : Property<TextView, Float>(Float::class.java, "textSize") {
+            override fun get(view: TextView): Float {
+                return view.textSize
+            }
+
+            override fun set(view: TextView, value: Float) {
+                view.setTextSize(TypedValue.COMPLEX_UNIT_PX, value)
+            }
+        }
+
+        val animator = ObjectAnimator.ofFloat(this, property, fromSize, toSize)
+        animator.duration = duration
+        animator.interpolator = AccelerateDecelerateInterpolator()
+        animator.start()
+    }
+
     fun buttSlapped(view: View) {
-        var c:Int=0
         val butt = view as Button
         val buttText = butt.text.toString()
         when (buttText) {
