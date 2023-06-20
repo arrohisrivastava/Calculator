@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         if (currentText.isNotEmpty()) {
             val newText = currentText.substring(0, currentText.length - 1)
             resultTextView.text = newText
-            if(newText.isEmpty())
+            if (newText.isEmpty())
                 clearExpression()
         }
     }
@@ -77,10 +77,14 @@ class MainActivity : AppCompatActivity() {
         val result = eval(expres)
         if (result.isValidExpression) {
             finResultTextView.append(result.value.toString())
-            val smol = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                24f, resources.displayMetrics)
-            val bigg = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                38f, resources.displayMetrics)
+            val smol = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                24f, resources.displayMetrics
+            )
+            val bigg = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                38f, resources.displayMetrics
+            )
             finResultTextView.animateTextSize(smol, bigg, 300)
             resultTextView.animateTextSize(bigg, smol, 300)
         } else {
@@ -88,15 +92,17 @@ class MainActivity : AppCompatActivity() {
             finResultTextView.text = "Invalid Expression"
         }
     }
+
     private fun modifyMathExpression(expression: String): String {
         var modifiedExpression = expression
-        modifiedExpression=expression.replace('×', '*').replace('÷', '/').replace('−', '-')
+        modifiedExpression = expression.replace('×', '*').replace('÷', '/').replace('−', '-')
 
         // Add 0 after decimal point if no number follows it
         modifiedExpression = modifiedExpression.replace(Regex("(?<=\\d)\\.(?=\\D|$)"), ".0")
 
         //Add * after % if it is followed by a number and not an operator
-        modifiedExpression = modifiedExpression.replace(Regex("(?<![*/+-])%(?=\\d)(?![*/+-])"), "%*")
+        modifiedExpression =
+            modifiedExpression.replace(Regex("(?<![*/+-])%(?=\\d)(?![*/+-])"), "%*")
 
         // Replace % with /100 if it is after a number
         modifiedExpression = modifiedExpression.replace(Regex("(?<=\\d)%"), "/100")
@@ -186,9 +192,15 @@ class MainActivity : AppCompatActivity() {
                     operason()
                 }
             }
-            else ->{
-                finResultTextView.text = ""
-                appendToExpression(buttText)
+
+            else -> {
+                if (buttText != "." && buttText.toDoubleOrNull() == null && finResultTextView.text.isNotEmpty()) {
+                    var number: String = finResultTextView.text.toString()
+                    clearExpression()
+                    appendToExpression(number + buttText)
+                } else {
+                    appendToExpression(buttText)
+                }
             }
         }
     }
